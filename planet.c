@@ -24,6 +24,10 @@ Netuno: 24.622 km (1,16)
 #include <GL/glu.h>
 #include <GL/glut.h>
 #include <math.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 
 typedef struct{
 	float X;
@@ -46,33 +50,12 @@ static int translacao_t = 0, translacao_me = 0, translacao_v = 0, translacao_ma 
 
 static int rotacao_t = 0, rotacao_me = 0, rotacao_v = 0, rotacao_ma = 0, rotacao_j = 0, rotacao_s = 0, rotacao_u = 0, rotacao_n = 0;
 
-void init(void) 
-{
-   glClearColor (0.0, 0.0, 0.0, 0.0);
-   glShadeModel (GL_FLAT);
-   
-   glClearColor (0.0, 0.0, 0.0, 0.0);
-
-	  // Habilita a definição da cor do material a partir da cor corrente
-   glEnable(GL_COLOR_MATERIAL);
-
-    //Habilita o uso de iluminação
-   glEnable(GL_LIGHTING);  
-
-	  // Habilita a luz de número 0
-   glEnable(GL_LIGHT0);
-
-	  // Habilita o depth-buffering
-   glEnable(GL_DEPTH_TEST);
-}
-
 EixoFLOAT camera;
 
 int modoCamera = 0;
 EixoFLOAT camera;
 EixoINT cursor;
 EixoINT mouse;
-Janela janela;
 
 int xInicial;
 int yInicial;
@@ -80,13 +63,12 @@ int xMove = 0;
 int yMove = 0;
 float anguloAtualX = M_PI_2;
 float anguloAtualY = M_PI/6;
-int distCamera = 4000;
+int distCamera = 10;
 float focoCamX = 0;
 float focoCamY = 0;
 float focoCamZ = 0;
 float offsetX = 0;
 float offsetZ = 0;
-float tamRastro = 1;
 
 void pCam(){
 	/**
@@ -121,40 +103,6 @@ void pCam(){
         gluLookAt(camera.X, camera.Y, camera.Z, focoCamX, focoCamY, focoCamZ, 0, 1, 0);
 }
 
-void DefineIluminacao (void)
-{
-		    // Parâmetro de iluminação ambiente
-        GLfloat luzAmbiente[4]={0.03,0.03,0.03,1.0};
-
-		    // Cor - variação (0.0 a 1.0) - define como cor da luz "branca"
-        GLfloat luzDifusa[4]={1.0,1.0,1.0,1.0};
-
-		    // Brilho
-        GLfloat luzEspecular[4]={0.2, 0.2, 0.2, 1.0};
-
-		    // Posição da luz no espaço
-        GLfloat posicaoLuz[4]={0.0, 0.0, 0.0, 1.0};
- 
-        // Capacidade de brilho do material
-        GLfloat especularidade[4]={1.0,1.0,1.0,1.0}; 
-        GLint especMaterial = 60;
- 
-        // Define a reflectância do material 
-        glMaterialfv(GL_FRONT,GL_SPECULAR, especularidade);
-
-        // Define a concentração do brilho
-        glMateriali(GL_FRONT,GL_SHININESS,especMaterial);
- 
-        // Ativa o uso da luz ambiente 
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
- 
-        // Define os parâmetros da luz de número 0
-        glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente); 
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa );
-        glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular );
-        glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz );   
-}
-
 void moveMouse(int x, int y){
 	// Modo rotação
 	if(modoCamera == 1){
@@ -178,8 +126,8 @@ void moveMouse(int x, int y){
 		}
 
 		// Limita o afastamento 
-		if(distCamera > 4500){
-			distCamera = 4500;
+		if(distCamera > 100){
+			distCamera = 100;
 		}
 
 		glutPostRedisplay();
@@ -237,86 +185,138 @@ void mousePress(int button, int state, int x, int y){
     
 }
 
+void init(void) 
+{
+   glClearColor (0.0, 0.0, 0.0, 0.0);
+   glShadeModel (GL_SMOOTH);
+   
+	  // Habilita a definição da cor do material a partir da cor corrente
+   glEnable(GL_COLOR_MATERIAL);
+
+    //Habilita o uso de iluminação
+   glEnable(GL_LIGHTING);  
+
+	  // Habilita a luz de número 0
+   glEnable(GL_LIGHT0);
+
+	  // Habilita o depth-buffering
+   glEnable(GL_DEPTH_TEST);
+}
+
+void DefineIluminacao (void)
+{
+		    // Parâmetro de iluminação ambiente
+        GLfloat luzAmbiente[4]={0.03,0.03,0.03,1.0};
+
+		    // Cor - variação (0.0 a 1.0) - define como cor da luz "branca"
+        GLfloat luzDifusa[4]={1.0,1.0,1.0,1.0};
+
+		    // Brilho
+        GLfloat luzEspecular[4]={0.2, 0.2, 0.2, 1.0};
+
+		    // Posição da luz no espaço
+        GLfloat posicaoLuz[4]={0.0, 0.0, 0.0, 1.0};
+ 
+        // Capacidade de brilho do material
+        GLfloat especularidade[4]={1.0,1.0,1.0,1.0}; 
+        GLint especMaterial = 60;
+ 
+        // Define a reflectância do material 
+        glMaterialfv(GL_FRONT,GL_SPECULAR, especularidade);
+
+        // Define a concentração do brilho
+        glMateriali(GL_FRONT,GL_SHININESS,especMaterial);
+ 
+        // Ativa o uso da luz ambiente 
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
+ 
+        // Define os parâmetros da luz de número 0
+        glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente); 
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa );
+        glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular );
+        glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz );   
+}
+
 
 void display(void)
 {
-   glClear (GL_COLOR_BUFFER_BIT);
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   glLoadIdentity();
    glColor3f (1.0, 1.0, 1.0);
+   
+   pCam();
 
    glPushMatrix();
-   glutWireSphere(1.0, 20, 16);   /* draw sol */
+   glutWireSphere(1, 20, 16);   /* draw sol */
    
    glRotatef ((GLfloat) translacao_t, 0.0, 1.0, 0.0);
    glTranslatef (2.0, 0.0, 0.0);
    glRotatef ((GLfloat) rotacao_t, 0.0, 1.0, 0.0);
-   glutWireSphere(0.3, 10, 8);    /* draw terra*/
+   glutWireSphere(0.020, 10, 8);    /* draw terra*/
 
    glPopMatrix();
    
    glPushMatrix();
-   
    glRotatef ((GLfloat) translacao_me, 0.0, 1.0, 0.0);
-   glTranslatef(2.5, 0.0, 0.0);
+   glTranslatef(3.0, 0.0, 0.0);
    glRotatef ((GLfloat) rotacao_me, 0.0, 1.0, 0.0);
-   glutWireSphere(0.11, 10, 8);   /*draw mercurio*/
+   glutWireSphere(0.031, 10, 8);   /*draw mercurio*/
    
    glPopMatrix();
 
    glPushMatrix();
    
    glRotatef ((GLfloat) translacao_v, 0.0, 1.0, 0.0);
-   glTranslatef(2.5, 0.0, 0.0);
+   glTranslatef(4.0, 0.0, 0.0);
    glRotatef ((GLfloat) rotacao_v, 0.0, 1.0, 0.0);
-   glutWireSphere(0.28, 10, 8);   /*draw vernus*/
+   glutWireSphere(0.050, 10, 8);   /*draw vernus*/
    
    glPopMatrix();
    
    glPushMatrix();
    
    glRotatef ((GLfloat) translacao_ma, 0.0, 1.0, 0.0);
-   glTranslatef(2.5, 0.0, 0.0);
+   glTranslatef(5.0, 0.0, 0.0);
    glRotatef ((GLfloat) rotacao_ma, 0.0, 1.0, 0.0);
-   glutWireSphere(0.15, 10, 8);   /*draw marta*/
+   glutWireSphere(0.080, 10, 8);   /*draw marta*/
    
    glPopMatrix();
    
    glPushMatrix();
    
    glRotatef ((GLfloat) translacao_j, 0.0, 1.0, 0.0);
-   glTranslatef(2.5, 0.0, 0.0);
+   glTranslatef(6.0, 0.0, 0.0);
    glRotatef ((GLfloat) rotacao_j, 0.0, 1.0, 0.0);
-   glutWireSphere(3.29, 10, 8);   /*draw jupiter*/
+   glutWireSphere(0.329, 10, 8);   /*draw jupiter*/
    
    glPopMatrix();
 
    glPushMatrix();
    
    glRotatef ((GLfloat) translacao_s, 0.0, 1.0, 0.0);
-   glTranslatef(2.5, 0.0, 0.0);
+   glTranslatef(7.00, 0.0, 0.0);
    glRotatef ((GLfloat) rotacao_s, 0.0, 1.0, 0.0);
-   glutWireSphere(2.74, 10, 8);   /*draw saturno*/
+   glutWireSphere(0.274, 10, 8);   /*draw saturno*/
    
    glPopMatrix();
 
    glPushMatrix();
    
    glRotatef ((GLfloat) translacao_u, 0.0, 1.0, 0.0);
-   glTranslatef(2.5, 0.0, 0.0);
+   glTranslatef(8.0, 0.0, 0.0);
    glRotatef ((GLfloat) rotacao_u, 0.0, 1.0, 0.0);
-   glutWireSphere(1.21, 10, 8);   /*draw urano*/
+   glutWireSphere(0.121, 10, 8);   /*draw urano*/
    
    glPopMatrix();
 
    glPushMatrix();
    
    glRotatef ((GLfloat) translacao_n, 0.0, 1.0, 0.0);
-   glTranslatef(2.5, 0.0, 0.0);
+   glTranslatef(9.0, 0.0, 0.0);
    glRotatef ((GLfloat) rotacao_n, 0.0, 1.0, 0.0);
-   glutWireSphere(1.16, 10, 8);   /*draw netuno*/
+   glutWireSphere(0.116, 10, 8);   /*draw netuno*/
    
    glPopMatrix();
-
-   pCam();
 
    DefineIluminacao();
    
@@ -328,34 +328,34 @@ void reshape (int w, int h)
    glViewport (0, 0, (GLsizei) w, (GLsizei) h); 
    glMatrixMode (GL_PROJECTION);
    glLoadIdentity ();
-   gluPerspective(60.0, (GLfloat) w/(GLfloat) h, 1.0, 20.0);
+   gluPerspective(60.0, (GLfloat) w/(GLfloat) h, 0.2, 4000.0);
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
-   gluLookAt (0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+   gluLookAt(0, 0, 1080, 0, 0, 0, 0, 1, 0);
 }
 
 void keyboard (unsigned char key, int x, int y)
 {
    switch (key) {
       case 'd':
-         distCamera = 4000;
+         distCamera = 10;
 	 focoCamX = 0.0;
 	 focoCamY = 0.0;
 	 focoCamZ = 0.0;
 	 offsetX = 0.0;
 	 offsetZ = 0.0;
-         rotacao_t = (rotacao_t + 1);
-         rotacao_me = (rotacao_me + 59);
-         rotacao_v = (rotacao_v + 243);
-         rotacao_ma = (rotacao_ma + 1);
-         rotacao_j = (rotacao_j + 0,39);
-         rotacao_s = (rotacao_s + 0,42);
-         rotacao_u = (rotacao_u + 0,71);
-         rotacao_n = (rotacao_n + 0,67);
+         rotacao_t = (rotacao_t + 1) % 360;
+         rotacao_me = (rotacao_me + 59) % 360;
+         rotacao_v = (rotacao_v + 243) % 360;
+         rotacao_ma = (rotacao_ma + 1) % 360;
+         rotacao_j = (rotacao_j + 0,39) % 360;
+         rotacao_s = (rotacao_s + 0,42) % 360;
+         rotacao_u = (rotacao_u + 0,71) % 360;
+         rotacao_n = (rotacao_n + 0,67) % 360;
          glutPostRedisplay();
          break;
       case 'D':
-         distCamera = 4000;
+         distCamera = 50;
 	 focoCamX = 0.0;
 	 focoCamY = 0.0;
 	 focoCamZ = 0.0;
@@ -372,6 +372,13 @@ void keyboard (unsigned char key, int x, int y)
          glutPostRedisplay();
          break;
       case 'y':
+         distCamera = 10;
+	 focoCamX = 0.0;
+	 focoCamY = 0.0;
+	 focoCamZ = 0.0;
+	 offsetX = 0.0;
+	 offsetZ = 0.0;
+
          translacao_t = (translacao_t + 365) % 360;
          translacao_me = (translacao_me + 87) % 360;
          translacao_v = (translacao_v + 225) % 360;
@@ -383,6 +390,13 @@ void keyboard (unsigned char key, int x, int y)
          glutPostRedisplay();
          break;
       case 'Y':
+         distCamera = 50;
+	 focoCamX = 0.0;
+	 focoCamY = 0.0;
+	 focoCamZ = 0.0;
+	 offsetX = 0.0;
+	 offsetZ = 0.0;
+
          translacao_t = (translacao_t - 365) % 360;
          translacao_me = (translacao_me - 87) % 360;
          translacao_v = (translacao_v - 225) % 360;
@@ -403,7 +417,7 @@ int main(int argc, char** argv)
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
    glutInitWindowSize (1000, 1000); 
-   glutInitWindowPosition (0, 0);
+   glutInitWindowPosition (100, 100);
    glutCreateWindow (argv[0]);
    init ();
    glutDisplayFunc(display); 
